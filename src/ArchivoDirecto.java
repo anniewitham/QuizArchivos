@@ -16,15 +16,21 @@ public class ArchivoDirecto {
     private File fl;
     RandomAccessFile archivo;
 
-    public ArchivoDirecto() {
+    public ArchivoDirecto() throws IOException {
         this.clave = 0;
         this.nombre = "";
         this.edad = 0;
         this.tamreg = 58;
         this.canreg = 0;
         try {
-            fl = new File("C://prueba.dat");
+            fl = new File("src//prueba.dat");
             archivo = new RandomAccessFile(fl, "rw");
+            // Recuperar la cantidad de registros existentes
+            archivo.seek(0);
+            canreg = archivo.length() / tamreg;
+            clave = (int) canreg; // Inicializar clave con la cantidad de registros existentes
+      
+            
         } catch (FileNotFoundException fnfe) {/* Archivo no encontrado */
         }
     }
@@ -50,9 +56,10 @@ public class ArchivoDirecto {
                 if (archivo.length() != 0) {
                     archivo.seek(archivo.length());
                 }
-                archivo.writeInt(clave);
+                archivo.writeInt(++clave);
                 archivo.writeChars(nombre);
                 archivo.writeInt(edad);
+                canreg++;
                 System.out.println("Ingresar otra linea (S or N)?: \t");
                 r = teclado.readLine();
             }
@@ -105,6 +112,18 @@ public class ArchivoDirecto {
         }
     }
 
+    public void contarRegistros() {
+        try {
+            archivo.seek(0); //Ubicarse al incio
+            // fomula para calcular numero registros = longitud del archivo / tamaño cada registro (58)bytes
+            canreg = archivo.length() / tamreg;  
+            System.out.println("\nCantidad de registros: " + canreg);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void cerrar() {
         try {
             archivo.close();
@@ -113,10 +132,12 @@ public class ArchivoDirecto {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+
         ArchivoDirecto arch = new ArchivoDirecto();
         arch.escribir();
         arch.leerTodo();
+        arch.contarRegistros();
         arch.cerrar();
     } //fin del main
 } //fin de la clas
