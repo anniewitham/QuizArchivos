@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,7 +19,7 @@ public class ArchivoDirecto {
         this.clave = 0;
         this.nombre = "";
         this.edad = 0;
-        this.tamreg = 58;
+        this.tamreg = 58; // Tamaño del registro
         this.canreg = 0;
         try {
             fl = new File("src//prueba.dat");
@@ -29,9 +28,9 @@ public class ArchivoDirecto {
             archivo.seek(0);
             canreg = archivo.length() / tamreg;
             clave = (int) canreg; // Inicializar clave con la cantidad de registros existentes
-      
-            
-        } catch (FileNotFoundException fnfe) {/* Archivo no encontrado */
+        } catch (FileNotFoundException fnfe) {
+            // Archivo no encontrado
+            System.err.println("Archivo no encontrado.");
         }
     }
 
@@ -41,31 +40,31 @@ public class ArchivoDirecto {
             System.out.println("\nEscribiendo Registros:");
             String r = "S";
             while (r.equalsIgnoreCase("S")) {
-                clave++;
+                
                 System.out.println("Ingrese nombre: ");
                 nombre = teclado.readLine();
                 if (nombre.length() < 25) {
-                    for (int i = nombre.length(); i < 25; i++) {
-                        nombre = nombre + " ";
-                    }
+                    nombre = String.format("%-25s", nombre); // Ajustar el nombre a 25 caracteres
                 } else {
                     nombre = nombre.substring(0, 25);
                 }
                 System.out.println("Ingrese edad: ");
                 edad = Integer.parseInt(teclado.readLine());
-                if (archivo.length() != 0) {
-                    archivo.seek(archivo.length());
-                }
-                archivo.writeInt(++clave);
+                
+                archivo.seek(archivo.length()); // Posicionar al final del archivo
+                archivo.writeInt(clave);
                 archivo.writeChars(nombre);
                 archivo.writeInt(edad);
+                
                 canreg++;
                 System.out.println("Ingresar otra linea (S or N)?: \t");
                 r = teclado.readLine();
             }
-        } catch (FileNotFoundException fnfe) {/* Archivo no encontrado */
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("Archivo no encontrado.");
         } catch (IOException ioe) {
-            /* Error al escribir */
+            System.err.println("Error al escribir en el archivo.");
+            ioe.printStackTrace();
         }
     }
 
@@ -73,21 +72,22 @@ public class ArchivoDirecto {
         System.out.println("\nMostrando todos los Registros");
         try {
             archivo.seek(0);
-            nombre = "";
             canreg = archivo.length() / tamreg;
             for (int r = 0; r < canreg; r++) {
                 clave = archivo.readInt();
-                for (int i = 0; i < 25; ++i) {
-                    nombre += archivo.readChar();
+                StringBuilder nombreBuilder = new StringBuilder();
+                for (int i = 0; i < 25; i++) {
+                    nombreBuilder.append(archivo.readChar());
                 }
+                nombre = nombreBuilder.toString().trim(); // Eliminar espacios en blanco
                 edad = archivo.readInt();
-                System.out.println(" Registro No: " + clave + " Nombre: "
-                        + nombre + " Edad: " + edad);
-                nombre = "";
+                System.out.println(" Registro No: " + clave + " Nombre: " + nombre + " Edad: " + edad);
             }
-        } catch (FileNotFoundException fnfe) {/* Archivo no encontrado */
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("Archivo no encontrado.");
         } catch (IOException ioe) {
-            /* Error al escribir */
+            System.err.println("Error al leer el archivo.");
+            ioe.printStackTrace();
         }
     }
 
@@ -96,31 +96,84 @@ public class ArchivoDirecto {
         System.out.println("\nBuscando un Registro:");
         System.out.println("Ingrese el numero de registro a buscar: ");
         try {
-            archivo.seek(0);
-            clave = Integer.parseInt(teclado.readLine());
-            archivo.seek((clave - 1) * tamreg); // argumento es tipo long
+            int numRegistro = Integer.parseInt(teclado.readLine());
+            archivo.seek((numRegistro - 1) * tamreg); // Argumento es tipo long
+            
             clave = archivo.readInt();
-            for (int i = 0; i < 25; ++i) {
-                nombre += archivo.readChar();
+            StringBuilder nombreBuilder = new StringBuilder();
+            for (int i = 0; i < 25; i++) {
+                nombreBuilder.append(archivo.readChar());
             }
+            nombre = nombreBuilder.toString().trim(); // Eliminar espacios en blanco
             edad = archivo.readInt();
-            System.out.println("Registro No. " + clave + " Nombre: " + nombre
-                    + " Edad: " + edad + "\n\n");
-            nombre = "";
+            System.out.println("Registro No. " + clave + " Nombre: " + nombre + " Edad: " + edad + "\n\n");
         } catch (FileNotFoundException fnfe) {
+            System.err.println("Archivo no encontrado.");
         } catch (IOException ioe) {
+            System.err.println("Error al leer el archivo.");
+            ioe.printStackTrace();
         }
     }
 
     public void contarRegistros() {
         try {
-            archivo.seek(0); //Ubicarse al incio
-            // fomula para calcular numero registros = longitud del archivo / tamaño cada registro (58)bytes
+            archivo.seek(0); // Ubicarse al inicio
             canreg = archivo.length() / tamreg;  
             System.out.println("\nCantidad de registros: " + canreg);
-
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void actualizarRegistro() {
+        BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("\nActualizando un Registro:");
+        System.out.println("Ingrese el numero de registro a actualizar: ");
+        try {
+            int numRegistro = Integer.parseInt(teclado.readLine());
+            archivo.seek((numRegistro - 1) * tamreg); // Se calcula la posición en el archivo
+            
+            // Leer la clave, nombre y edad actuales
+            int claveLeida = archivo.readInt();
+            StringBuilder nombreActual = new StringBuilder();
+            for (int i = 0; i < 25; i++) {
+                nombreActual.append(archivo.readChar()); // Leer el nombre (25 caracteres)
+            }
+            int edadActual = archivo.readInt();
+            
+            System.out.println("Registro actual: ");
+            System.out.println("Clave: " + claveLeida + " Nombre: " + nombreActual.toString().trim() + " Edad: " + edadActual);
+            
+            System.out.println("¿Qué desea modificar? (1 = Nombre, 2 = Edad): ");
+            int opcion = Integer.parseInt(teclado.readLine());
+            
+            if (opcion == 1) {
+                // Actualizar el nombre
+                System.out.println("Ingrese el nuevo nombre: ");
+                String nuevoNombre = teclado.readLine();
+                
+                // Ajustar el nombre para que tenga 25 caracteres
+                if (nuevoNombre.length() < 25) {
+                    nuevoNombre = String.format("%-25s", nuevoNombre); // Rellenar con espacios
+                } else {
+                    nuevoNombre = nuevoNombre.substring(0, 25);
+                }
+                
+                archivo.seek((numRegistro - 1) * tamreg + 4); // La clave ocupa los primeros 4 bytes
+                archivo.writeChars(nuevoNombre); // Escribir el nuevo nombre
+                
+            } else if (opcion == 2) {
+                // Actualizar la edad
+                System.out.println("Ingrese la nueva edad: ");
+                int nuevaEdad = Integer.parseInt(teclado.readLine());
+                
+                archivo.seek((numRegistro - 1) * tamreg + 54); // 54 bytes es donde empieza la edad
+                archivo.writeInt(nuevaEdad); // Escribir la nueva edad
+            }
+            
+            System.out.println("Registro actualizado con éxito.");
+        } catch (IOException e) {
+            e.printStackTrace(); // Manejo de errores de entrada/salida
         }
     }
 
@@ -133,11 +186,11 @@ public class ArchivoDirecto {
     }
 
     public static void main(String[] args) throws IOException {
-
         ArchivoDirecto arch = new ArchivoDirecto();
         arch.escribir();
         arch.leerTodo();
         arch.contarRegistros();
+        arch.actualizarRegistro(); // Llamada para actualizar un registro
         arch.cerrar();
-    } //fin del main
-} //fin de la clas
+    } // fin del main
+} // fin de la clase
