@@ -167,7 +167,7 @@ public class ArchivoDirecto {
                         nuevoNombre = nuevoNombre.substring(0, 25);
                     }
 
-                    archivo.seek((numRegistro) * tamreg + 4); // La clave ocupa los primeros 4 bytes
+                    archivo.seek((numRegistro -1 ) * tamreg + 4); // La clave ocupa los primeros 4 bytes
                     archivo.writeChars(nuevoNombre); // Escribir el nuevo nombre
 
                 } else if (opcion == 2) {
