@@ -167,7 +167,7 @@ public class ArchivoDirecto {
                         nuevoNombre = nuevoNombre.substring(0, 25);
                     }
 
-                    archivo.seek((numRegistro - 1) * tamreg + 4); // La clave ocupa los primeros 4 bytes
+                    archivo.seek((numRegistro) * tamreg + 4); // La clave ocupa los primeros 4 bytes
                     archivo.writeChars(nuevoNombre); // Escribir el nuevo nombre
 
                 } else if (opcion == 2) {
@@ -187,6 +187,36 @@ public class ArchivoDirecto {
             System.out.println("No se actualizara ningun registro.");
         }
     }
+    
+    public void buscarClavePrimerRegistro() {
+    try {
+        archivo.seek(0); // Ir al inicio del archivo
+        int primeraClave = archivo.readInt(); // Leer la clave del primer registro
+        System.out.println("La clave del primer registro es: " + primeraClave);
+    } catch (FileNotFoundException fnfe) {
+        System.err.println("Archivo no encontrado.");
+    } catch (IOException ioe) {
+        System.err.println("Error al leer el archivo.");
+        ioe.printStackTrace();
+    }
+}
+
+    public void buscarClavePenultimoRegistro() {
+        try {
+            if (canreg > 1) { // Verificar que haya al menos dos registros
+                archivo.seek((canreg - 2) * tamreg); // Ir al penúltimo registro
+                int penultimaClave = archivo.readInt(); // Leer la clave del penúltimo registro
+                System.out.println("La clave del penultimo registro es: " + penultimaClave);
+            } else {
+                System.out.println("No hay suficientes registros para mostrar el penúltimo.");
+            }
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("Archivo no encontrado.");
+        } catch (IOException ioe) {
+            System.err.println("Error al leer el archivo.");
+            ioe.printStackTrace();
+        }
+    }
 
     public void cerrar() {
         try {
@@ -201,6 +231,8 @@ public class ArchivoDirecto {
         arch.escribir();
         arch.leerTodo();
         arch.contarRegistros();
+        arch.buscarClavePrimerRegistro(); // Llamada para buscar la clave del primer registro
+        arch.buscarClavePenultimoRegistro(); // Llamada para buscar la clave del penúltimo registro
         arch.actualizarRegistro(); // Llamada para actualizar un registro
         arch.cerrar();
     } // fin del main
